@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naive implementation</title>
+
+    <!-- EaselJS -->
+	<script src="libs/easeljs/easeljs.js"></script>
+	<!-- EaselJS -->
+	
+</head>
+
+
+<body>
+<div style="display:flex">
+    <div>
+        <canvas id="demoCanvas" width="800" height="800"></canvas>
+    </div>
+    <div>
+        <h1>Naive implementation</h1>
+        here, condider as before that all the pathes are on a grid... for testing , i only implemented 3 pathes , to see what happens...<br />
+        - the grid is defined by rows ( or steps )  , and columns <br />
+        - at step 1 ( or row 1 ) we randomly pick up for each path a column<br />
+        - for the next steps , for each pathes,  we randomly choose if it goes on the left,  on the right, or it goes straight.<br />
+        - watch out as if the path is on the border of the grid , there are only two choices.. eg if it is on the left of the grif the path can go straight, or on the right only...<br />
+        <br /><br />
+        Some issues whith this naive implementation : ( try refresh browser if it does not appear ... ) : <br />
+        - pathes can cross each other. <br />
+        - pathes can be extremely straight . or we can imagine they overlap on 3 or 4 steps , which might not be so nice .
+        <br /><br />
+        Of course comments in the js file if you wish to see it !
+        <a href="index2.html">Not so Naive implementation</a>
+    </div>
+</div>
+
+
+<script src="js/main2.js"></script>
+</body>
+</html>
