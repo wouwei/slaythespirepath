@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>>Not so naive implementation</title>
+
+    <!-- EaselJS -->
+	<script src="libs/easeljs/easeljs.js"></script>
+	<!-- EaselJS -->
+	
+</head>
+
+
+<body>
+<div style="display:flex">
+    <div>
+        <canvas id="demoCanvas" width="800" height="800"></canvas>
+    </div>
+    <div>
+        <h1>Not so naive implementation</h1>
+        First thing changed, we have randomly from 2 to 4 pathes. The concept here is to have pathes which cannot cross each others<br /><br />
+        At the start of the Algorithm : <br />
+        - like last time, we create a  2D array called pathes, but nesting now from 2 to (columns/2) pathes<br /><br />
+        - before initializing the pathes with the first steps , it is important to be sure that the first path is on the left of the second which should be on the left of the next paths, etc..<br />
+        - said differently. we have pathes[row][myPathNumber] = column . row is the row on the grid, column : column on the grid, myPathNumber : mypath from the left to the right on the grid
+        - that said,  we want to respect pathes[n][0] < pathes[n][1] < pathes[n][2]< etc ...<br /><br />
+        <br /><br />
+        At the heart of the algorithm :<br />
+        - <b>we want to respect pathes[n][0] < pathes[n][1] < pathes[n][2]< etc ...</b><br />
+        - we calculate steps from the left path to the right path .. <br />
+        - if we take a path to calculate its next step, we need to take into account , the already calculated step from the left path, and the actual step from the right path.<br />
+        - the NEXT function has been modified to take into account its neighbours.
+        <ul>
+            <li>
+                we take the leftStep, which is the calculated step of the left neighbour of the path. if no left neighbour, we take the left side of the grid as a limit
+            </li>
+            <li>
+                we take the rightStep, which is the actual not-yet calculated step of the right neighbour of the path.if no right neighbour, we take the the right side of the grid as a limit.
+            </li>
+            <li>
+                we the randomly calculate the next step of the selected path, in the boundary of its neighbours...
+            </li>
+        </ul>
+        -two special cases has been raised :<br />
+        <ul>
+            <li>
+                left path issue..
+            </li>
+            <ol>
+                <li>
+                    the selected path and its left neighbour are on a same point .
+                </li>
+                <li>
+                    the left path went on the right ( remember, steps calculus goes from left path to right path )  .
+                </li>
+                <li>
+                    the selected path goes awol OUTSIDE the left / right pathes boundaries...
+                </li>
+                <li>
+                    selected path needs to follow its left neighbour, in order to avoid a crossing...
+                </li>
+            </ol>
+            <li>
+                The right grid border
+            </li>
+            <ol>
+                <li>
+                    selected path is on the right grid border.
+                </li>
+                <li>
+                    its left neighbour went on right, on the right grid border
+                </li>
+                <li>
+                    As in the algorithm, we consider that if the left path will share a point with the selected path, the selected path can go only straight , or on the right..
+                </li>
+                <li>
+                    .. We need for the selected path to not go outside the grid.. And can only go straight in the case
+                </li>
+            </ol>
+        </ul>
+        - a new function has been added to handle the calculation of all the pathes steps,  called NEXTSTEPS...<br /><br />
+        Of course comments in the js file if you wish to see it !<br /><br />
+        <a href="index2.html">Not so Naive implementation</a>
+        <hr />
+        <a href="index.html">To THE GRID</a>
+    </div>
+</div>
+
+
+<script src="js/main3.js"></script>
+</body>
+</html>

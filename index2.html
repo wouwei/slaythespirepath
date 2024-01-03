@@ -19,18 +19,25 @@
     </div>
     <div>
         <h1>Naive implementation</h1>
-        here, condider as before that all the pathes are on a grid... for testing , i only implemented 3 pathes , to see what happens...<br />
+        And voila ... i only implemented 3 pathes , just to see what happens...<br /><br />
+        At the start of the algorithm : <br />
         - the grid is defined by rows ( or steps )  , and columns <br />
-        - at step 1 ( or row 1 ) we randomly pick up for each path a column<br />
-        - for the next steps , for each pathes,  we randomly choose if it goes on the left,  on the right, or it goes straight.<br />
-        - watch out as if the path is on the border of the grid , there are only two choices.. eg if it is on the left of the grif the path can go straight, or on the right only...<br />
+        - We define a 2D array , which will be : pathes[grid_row][path_number] = grid_column <br />
+        - at step 1 ( or row 1 ) we randomly pick up for each path a column number<br /><br />
+        The heart of the algorithm : <br />
+        - for the next steps , for each pathes,  we randomly choose if it goes on the left,  on the right, or it goes straight. So 1/3 chance for each choice<br />
+        - We take into account that the path can flirt with the grid border. In that case , there are only two choices.. so only 1/2 for each choice, not 1/3<br />
+        - Eg for above. Path is on the left, it can goes only straight, or on the right..<br />
+        -  <b>this algorithm heart is inside the NEXT() function.</b><br />
         <br /><br />
-        Some issues whith this naive implementation : ( try refresh browser if it does not appear ... ) : <br />
+        Some issues whith this naive implementation : ( try to refresh browser if it does not appear ... ) : <br />
         - pathes can cross each other. <br />
         - pathes can be extremely straight . or we can imagine they overlap on 3 or 4 steps , which might not be so nice .
         <br /><br />
         Of course comments in the js file if you wish to see it !
-        <a href="index2.html">Not so Naive implementation</a>
+        <a href="index3.html">Not so Naive implementation</a>
+        <hr />
+        <a href="index.html">To THE GRID</a>
     </div>
 </div>
 
