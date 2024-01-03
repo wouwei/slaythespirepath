@@ -1,4 +1,4 @@
-simple explanation on how to create an algorithm to generate a slay the spire like path.. just click on index.html !
+simple explanation -well, trying to, in that foreign english language..  On how to create an algorithm to generate a slay the spire like path.. just click on index.html !
 
 to come : 
 
