@@ -264,7 +264,6 @@ function slaythespirePath(cfg) {
                 }
                 circles.push(Aline);
             }
-            console.log(circles);
             sts.datas.easelJS.circles = circles;
         },
 
