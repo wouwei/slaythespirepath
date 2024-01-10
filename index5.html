@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>>Not so naive implementation... Refactored</title>
+
+    <!-- EaselJS -->
+	<script src="libs/easeljs/easeljs.js"></script>
+	<!-- EaselJS -->
+	
+</head>
+
+
+<body>
+<div style="display:flex">
+    <div>
+        <canvas id="demoCanvas" width="800" height="800"></canvas>
+    </div>
+    <div>
+        <h1>crooking pathes...</h1>
+
+        New constraint : Pathes cannot go straight more than 4 steps ( see on the config part , sts.datas.config)<br /><br />
+
+        Now that we have more than one constraint , we need an object which gather path informations , and which can be used by n constraints and in the path calulation..
+        <ul>
+            <li>
+                the ''check'' object play that role , it gathers the blocked path infos from the two constraints ( ''Xcross'' , and ''straight'' )
+            </li>
+            <li>
+                it is also used to calculate the distance 
+            </li>
+            <li>
+                The NEXT function has been revamped.
+            </li>
+            <li>
+                Constraints are being calculated in 2 separates functions : XCROSS() for the Xcross constraint.. CROOKING() for the straight constraint
+            </li>
+            <li>
+                direction is now calculated in the DIRECTION() function.
+            </li>
+        </ul>
+        <br /><br />
+        Still there are a few things to point out : 
+        <ul>
+            <li>
+                pathes can still have more than 4 steps straight. there are some cases where there are no choices . eg 
+            </li>
+            <ul>
+                <li>
+                    we have 3 pathes 
+                </li>
+                <li>
+                    At one grid row , all the pathes are on the same column/step .  
+                </li>
+                <li>
+                    Unfortunately , all the pathes have all 4 steps straight. 
+                </li>
+                <li>
+                    there's no possible direction for the next step for all the pathes ...
+                </li>
+                <li>
+                    as the pathes must go on, we drop the straight constraint.
+                </li>
+                <li>
+                    now we have at least 1 path  with 5 steps on .... 
+                </li>
+            </ul>
+            <li>
+                path can share n steps , or can never share steps..
+            </li>
+        </ul>
+            <a href="index5.html">joined pathes...</a>
+            <hr />
+            <a href="index.html">To THE GRID</a>
+    </div>
+</div>
+
+
+<script src="js/main5.js"></script>
+</body>
+</html>

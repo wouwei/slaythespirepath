@@ -20,22 +20,43 @@
     <div>
         <h1>Naive implementation</h1>
         And voila ... i only implemented 3 pathes , just to see what happens...<br /><br />
-        At the start of the algorithm : <br />
-        - the grid is defined by rows ( or steps )  , and columns <br />
-        - We define a 2D array , which will be : pathes[grid_row][path_number] = grid_column <br />
-        - at step 1 ( or row 1 ) we randomly pick up for each path a column number<br /><br />
-        The heart of the algorithm : <br />
-        - for the next steps , for each pathes,  we randomly choose if it goes on the left,  on the right, or it goes straight. So 1/3 chance for each choice<br />
-        - We take into account that the path can flirt with the grid border. In that case , there are only two choices.. so only 1/2 for each choice, not 1/3<br />
-        - Eg for above. Path is on the left, it can goes only straight, or on the right..<br />
-        -  <b>this algorithm heart is inside the NEXT() function.</b><br />
-        <br /><br />
+        In terminology i'll use : 
+        <ul>
+            <li> the grid is where we draw the lines. It has rows and columns.</li>
+            <li>pathes as the lines ... </li>
+            <li>step as a point ( a path step )  and step<b>s</b> as a grid row ( or pathes steps )  .</li>
+            <li>left and right border of the grid : the path should stay inside the grid...</li>
+        </ul>
+        <br />
+        
+        First we pick up a random number which corresponds to a grid column index. Then for each step a path has choice between going left, straight , or right . there are 2 constraints : 
+        <ul>
+            <li>when a path is on the left border, it has only two choices :  going straight or right</li>
+            <li>when a path is on the right border , it has only two choices : going straight or left</li>
+        </ul>
+        <br />
+
+        Inside the js - i talk only about the the algo here .
+        <ul>
+            <li>the pathes are stored in a 2D array.  pathes[grid_row_index][path_number] = grid_column_index</li>
+            <li>by using the grid column indexes for the steps, we can make a random between -1 ,0 and 1 in order to know the next path direction and step location.  </li>
+            <ul>
+                <li>-1 would be going on the left</li>
+                <li>0 would be going straight</li>
+                <li>1 would be going on the right</li>
+            </ul>
+            <li>the heart of the algorithm is inside the NEXT() function </li>
+        </ul>
+        <br />
+        
         Some issues whith this naive implementation : ( try to refresh browser if it does not appear ... ) : <br />
-        - pathes can cross each other. <br />
-        - pathes can be extremely straight . or we can imagine they overlap on 3 or 4 steps , which might not be so nice .
-        <br /><br />
+        <ul>
+            <li>pathes can cross each other.</li>
+            <li>pathes can be extremely straight . or we can imagine they overlap on 3 or 4 steps , which might not be so nice .</li>
+        </ul>
+        <br />
         Of course comments in the js file if you wish to see it (main2.js)!
-        <a href="index3.html">Not so Naive implementation</a>
+        <a href="index3.html">no crossing!</a>
         <hr />
         <a href="index.html">To THE GRID</a>
     </div>

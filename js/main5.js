@@ -12,6 +12,34 @@ function slaythespirePath(cfg) {
         /** point definition */
         point: function (x = 0, y = 0) {
             return { x: x, y : y };
+        },
+
+        /** a node definition (storing path straight line infos) */
+        node: function (left = 1, straight = 1, right = 1) {
+            return { left: left, straight: straight, right: right };
+        },
+
+        /** object used in the algorithm to know in which direction the path can go */
+        check: function () {
+            return {
+                /** current steps */
+                steps: {
+                    /** calculated steps from the path left to the current path */
+                    left: 0,
+                    /** current path step */
+                    last: 0,
+                    /** current step from path right to the current path */
+                    right : 0,
+                },
+                /** direction the path can use for the next step*/
+                direction: {
+                    left: true,
+                    straight: true,
+                    right: true
+                },
+                /** number of blocked directions */
+                n: 0
+            };
         }
 
     };
@@ -33,13 +61,20 @@ function slaythespirePath(cfg) {
             },
             /** number of pathes to draw. If equal zero it will random it */
             numberOfPathes: 0,
-
-            
-
+            /** max straight step that a path can do .*/
+            pathSegment : 4,
         },
 
         /** pathes storage 2D array ; pathes[grid.row][PathNumber]=grid.col */
         pathes: new Array(),
+
+        /** storing on each grid point/step pathes length..  */
+        nodes: {
+            /** the node data */
+            data: new Array(),
+            /** on which index we are - in the algorithm*/
+            rowIndex : 0
+        },
 
         /** canvas (drawing) it should be handled better, but i focus on the algo, not implementing the drawing of it... */
         easelJS: {
@@ -82,27 +117,15 @@ function slaythespirePath(cfg) {
          */
         firstStep : function () {
            //VAR
-            numberOfPathes = sts.datas.config.numberOfPathes; // !! not a reference but a copy of the value... ( because it is a number )
+            numberOfPathes = sts.datas.config.numberOfPathes;
             pathes = sts.datas.pathes;
             grid = sts.datas.config.grid;
 
             // randomize it between [2,grid colum/2] if = 0
             if (numberOfPathes == 0) {
 
-                //#region some explanation ...
-
-                /**
-                 * why -2 then +2 ?
-                 * rand gives always a result from 0 to 1 ..
-                 * eg : number of columns = 10
-                 * 10/2 = 5 . but we dont want to rand [0,5]
-                 * 5-2 = 3 . rand [0,3]
-                 * then +2 = rand [0+2,3+2] = [2,5]
-                 */
-
-                 //#endregion some explanation ...
                 numberOfPathes = Math.ceil(Math.random() * (grid.cols / 2 - 2)) + 2; 
-                // .. and we store it ..  numberofpathes is a copy, not a reference...
+                // .. and we store it 
                 sts.datas.config.numberOfPathes = numberOfPathes;
                 
             };
@@ -126,19 +149,10 @@ function slaythespirePath(cfg) {
             pathes = sts.datas.pathes;
             grid = sts.datas.config.grid;
 
-            for (var i = 0; i < grid.rows - 1; i++) {
-                // #########################################################################
-                // ## the below code it the longer and explained version of the algorithm##
-                // #########################################################################
-                LastSteps = pathes[pathes.length - 1]; // we take the latest steps for all the pathes 
-                NextSteps = sts.algo.NEXTSTEPS(LastSteps) // we calculate the next steps based on the latest step 
-                // => pathes.push(NextSteps); // we store it ... 
 
-                // #############################
-                // ## the compressed algorithm##
-                // #############################
+            for (var i = 0; i < grid.rows - 1; i++) {
+                sts.datas.nodes.rowIndex = i;
                 pathes.push(sts.algo.NEXTSTEPS(pathes[pathes.length - 1]));
-                
             };
             
         },
@@ -153,63 +167,179 @@ function slaythespirePath(cfg) {
             NS = new Array();
             grid = sts.datas.config.grid;
             numberOfPathes = sts.datas.config.numberOfPathes;
-
+            
             // path by path , from left to right....
             for (var i = 0; i < numberOfPathes; i++) {
-                leftStep = (i == 0) ? 0 : NS[i - 1]; // remember, left path is already calculated.. 
-                rightStep = (i == numberOfPathes - 1) ? grid.cols - 1 : LastSteps[i + 1]; // right path is not yet calculated...
-
-                NS.push(sts.algo.NEXT(leftStep, LastSteps[i], rightStep));
+                //VAR
+                check = sts.models.check();
+                  
+                check.steps.left = (i == 0) ? 0 : NS[i - 1]; 
+                check.steps.last = LastSteps[i];
+                check.steps.right = (i == numberOfPathes - 1) ? grid.cols - 1 : LastSteps[i + 1]; 
+                
+                // path storage
+                NS.push(sts.algo.NEXT(check));
 
             }
             return NS;
         },
 
         /**
-         * knowing a path step ( or row index) , returns the next step of this path
-         * constraints are not crossing the the neightbourgh pathes
-         * @param {number} leftStep : step taken by the path on the left of the selected path ( remember we calculate steps from the left to the right )
-         * @param {number} lastStep : the step / column index of the current row
-         * @param {number} rightStep : the laststep done by the path on the right of the selected path ( not calulated yet , since we calculate from the left to the right)
+         * knowing a path step ( or row index) , returns the next step to do for this  path
+         * @param {sts.model.check} check : used to target blocked path
+         * @returns the next step
+
          */
-        NEXT : function (leftStep, lastStep, rightStep) {
+        NEXT: function (check) {
+            /**
+             * this time we have more than one constraint. 
+             * in order to calculate a path direction , we need an object usable by n constraints and that could be used to calculate the direction
+             * this is object ''check '' , play that role , gathering infos on the direction from n constraints, and then being used to calculate the direction.
+             * 
+             * still in this algorithm, the ''Xcross'' constraint prevail on the ''straight'' constraint . a few case raises where all the pathes are blocked. 
+             * we roll back then only on the ''Xcross'' constraint , which mainly consist on being sure that our pass does not cross each other,
+             * and more importantly that they do not go outside the grid...
+             * 
+             * 
+             * 
+             */
+
+            //constraint : pathes should not cross each other 
+            check = sts.algo.XCROSS(check);
+
+            //constraint : crooking - path should no go n steps straight 
+            check = sts.algo.CROOKING(check);
+
+            //calculate the direction
+            direction = sts.algo.DIRECTION(check);
+           
+
+            //finally return the next step...
+            return check.steps.last + direction;
+        },
+
+        /**
+         * Verify the X cross constraints...
+         * @param {sts.model.check} check : used to target blocked path
+         * @returns the modified check...
+         */
+        XCROSS: function (check) {
             //VAR
             grid = sts.datas.config.grid;
 
-            // #########################################################################
-            // ## the below code it the longer and explained version of the algorithm##
-            // #########################################################################
+            /** here we exploded the last algo logic , in order to know which path we cannot take  
+             *  this time we have the straight path constraint too, so we cannot calculate directly a direction to take...
+             */
+            if (check.steps.last < check.steps.left) { // THE xcrossing case..
+                check.direction.left = false;
+                check.direction.straight = false;
+            }
+            else if (check.steps.last == 0) { // getting outside the left side of the grid 
+                check.direction.left = false
+            }
+            else if (check.steps.left == grid.cols - 1) { // Getting outside the right side of the grid
+                check.direction.left = false;
+                check.direction.right = false;
+            }
+            else if (check.steps.last == check.steps.left) { // can only go straight or right ?
+                check.direction.left = false;
+            }
+            else if (check.steps.last == check.steps.right) { // can only go straight or left ?
+                check.direction.right = false;
+            }
 
-            // in the ''naive'' algo we were limiting the path steps between the left and right side of the grid.. here , we limit the path between its path neighbours.
-            // check out the NEXSTEPS function , but regarding the neighbour pathes
-            // if the path we work on is the last one on the left, the leftstep is the left grid value (0 in that case ) 
-            // if the path we work on is the last one on the right, the rightstep is the right grid value ( 6 by default - 7 columns ).
-            // nexstep is the direction the leftstep should take : left (-1) straight(0) right(1)
-            Nextstep = (lastStep == leftStep) ? Math.round(Math.random())
-                : (lastStep == rightStep) ? - Math.round(Math.random())
-                    : Math.ceil(Math.random() * 3) - 2;
+            return check;
+        },
 
-            /** in this scenario . two cases are missing */
+        /**
+         * making path no so straight
+         * @param {sts.model.check} check : used to target blocked path
+         * @returns the modified check...
+         */
+        CROOKING: function (check) {
+            //VAR
+            nodes = sts.datas.nodes.data; // grid points or possible steps on the grid
+            rowIndex = sts.datas.nodes.rowIndex; // on which row we are working.
+            SegmentLength = sts.datas.config.pathSegment; // max step on a path
+            currentNode = nodes[rowIndex][check.steps.last]; // on which point - step we are 
 
-            // => left path shared a point with the selected path.left path went on the right.selected path should follow...
-            // eg leftstep = 3 (already calculated step) , laststep = 2 .. Nextstep must lead to 3
-            Nextstep = (lastStep < leftStep) ? 1 : Nextstep;
+            if (currentNode.left > SegmentLength - 1) { // we have max steps straight on the left direction..
+                check.direction.left = false;
+            }
+            if (currentNode.straight > SegmentLength - 1) { // we have max steps straight on the straight direction..
+                check.direction.straight = false;
+            }
+            if (currentNode.right > SegmentLength - 1) { // we have max steps straight on the right direction..
+                check.direction.right = false;
+            }
 
-            // => selected path is on the right side of the grid. left path goes on the right side of the grid. selected path should stay on the right side of the grid...
-            Nextstep = (leftStep == grid.cols - 1) ? 0: Nextstep;
+            return check;
+        },
 
-            // #############################
-            // ## the compressed algorithm##
-            // #############################
-            Nextstep = (lastStep < leftStep) ? 1 // left path shared a point with the selected path. left path went on the right . selected path should follow...
-                : (leftStep == grid.cols - 1) ? 0 // the case :  selected path is on the right border of the grid.Its left neighbour went on the right border of the grid. the selected path can only go straight up.
-                    : (lastStep == leftStep) ? Math.round(Math.random())
-                        : (lastStep == rightStep) ? - Math.round(Math.random())
-                            : Math.ceil(Math.random() * 3) - 2;
+        /**
+         * which direction then ? 
+         * @param {sts.model.check} check : used to target blocked path
+         * @returns the direction
+         */
+        DIRECTION: function (check) {
+            // how many steps are blocked..
+            if (check.direction.left == false)
+                check.n++;
+            if (check.direction.straight == false)
+                check.n++;
+            if (check.direction.right == false)
+                check.n++;
 
-        return lastStep + Nextstep;
-    }
 
+            /** calculating next direction ... */
+            // we always take left - straight - right in this order to assign the random value.
+            direction = 0;
+            if (check.n == 1) { // 1 path is restricted - 2 choices 
+                rnd = Math.round(Math.random());
+                if (check.direction.left == false) { // possibility : (STRAIGHT RIGHT)
+                    direction = (rnd == 0) ? 0 : 1;
+                }
+                else { // 2 possibilities
+                    if (check.direction.straight == false) { // possibility : (LEFT RIGHT)
+                        direction = (rnd == 0) ? -1 : 1;
+                    }
+                    else { // possibility : (LEFT STRAIGHT)
+                        direction = (rnd == 0) ? -1 : 0;
+                    }
+                }
+
+            }
+            else if (check.n == 2) { // 2 pathes are restricted - unique choice
+
+                if (check.direction.left == true) direction = -1;
+                if (check.direction.straight == true) direction = 0;
+                if (check.direction.right == true) direction = 1;
+
+            }
+            else { // 3 pathes are restricted , or no pathes are restricted. we drop the constraint straight path and take the previous algo.
+
+                direction = (check.steps.last < check.steps.left) ? 1 // left path shared a point with the selected path. left path went on the right . selected path should follow...
+                    : (check.steps.left == grid.cols - 1) ? 0 // the case :  selected path is on the right border of the grid.Its left neighbour went on the right border of the grid. the selected path can only go straight up.
+                        : (check.steps.last == check.steps.left) ? Math.round(Math.random())
+                            : (check.steps.last == check.steps.right) ? - Math.round(Math.random())
+                                : Math.ceil(Math.random() * 3) - 2;
+            }
+
+
+
+
+            /** stocking the next direction information */
+            if (direction == -1)
+                nodes[rowIndex + 1][check.steps.last + direction].left = currentNode.left + 1;
+            if (direction == 0)
+                nodes[rowIndex + 1][check.steps.last + direction].straight = currentNode.straight + 1;
+            if (direction == 1)
+                nodes[rowIndex + 1][check.steps.last + direction].right = currentNode.right + 1;
+
+            // finally returning the direction.
+            return direction;
+
+        },
 
     };
 
@@ -349,6 +479,7 @@ function slaythespirePath(cfg) {
         all: function (config) {
             sts.init.configUpdate(config);
             sts.init.coordinates();
+            sts.init.nodes();
             sts.algo.all();
         },
 
@@ -382,7 +513,24 @@ function slaythespirePath(cfg) {
                 coords.push(arow);
             }
         },
-        
+
+        /** initialize the grid , with path step basic information */
+        nodes() {
+            //VAR
+            grid = sts.datas.config.grid
+            nodes = new Array();
+            node = sts.models.node;
+            for (var i = 0; i < grid.rows; i++) {
+                Aline = new Array();
+                for (var j = 0; j < grid.cols; j++) {
+                    Aline.push(node());
+                }
+                nodes.push(Aline);
+            }
+
+            sts.datas.nodes.data = nodes;
+            
+        }
     };
 
     sts.init.all(cfg);

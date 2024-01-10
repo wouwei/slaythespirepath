@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>>Not so naive implementation</title>
+    <title>>no crossing!</title>
 
     <!-- EaselJS -->
 	<script src="libs/easeljs/easeljs.js"></script>
@@ -18,77 +18,62 @@
         <canvas id="demoCanvas" width="800" height="800"></canvas>
     </div>
     <div>
-        <h1>Not so naive implementation</h1>
-        First thing changed, we have randomly from 2 to 4 pathes. The concept here is to have pathes which cannot cross each others.  refresh the browser if you do not believe me..<br /><br />
-        At the start of the Algorithm : <br />
-        - like last time, we create a  2D array called pathes, but nesting now from 2 to (columns/2) pathes<br />
-        - in the first steps , we want to be sure that the first to last path goes from the left to the right side of the grid<br />
-        - said differently :<br />
+        <h1>no crossing!</h1>
+        The changes : 
         <ul>
-            <li>we have pathes[row][myPathNumber] = column .</li>
-            <li> row is the row on the grid, </li>
-            <li>column is the column on the grid</li>
-            <li>, myPathNumber : the path number..</li>
-            <li>that said,  we want to respect pathes[n][0] < pathes[n][1] < pathes[n][2]< etc ...</li>
-            </ul>
+            <li>we get a random number of pathes from 2 to 4</li>
+            <li>we keep the structure pathes[row][myPathNumber] = column</li>
+            <li>we add this constraint for each row : pathes[n][0] < pathes[n][1] < pathes[n][2]< etc ...</li>
+            <li> which means the path 0 can never cross path 1 , which can never cross path 2 , etc.. </li>
+        </ul>
+        
         <br /><br />
-
-        At the heart of the algorithm :<br />
-        - <b>we want to respect pathes[n][0] < pathes[n][1] < pathes[n][2]< etc ...</b><br />
-        - we calculate steps from the left path to the right path .. <br />
-        - if we take a path to calculate its next step, we need to take into account , the already calculated step from the left path, and the actual step from the right path.<br />
-        - the NEXT function has been modified to take into account its neighbours.
+        As for the algorithm :
+        <ul>
+            <li>As before , a path has 3 choices , except when it is : </li>
+            <ul>
+                <li>on its left neightbour step : the path then can only take its left neighbour step or go on the right </li>
+                <li>on its right neighbour step : the path then can only take its right neightbour step or go on the left </li>
+                <li>on its left and right neighbour step : the path then can only go straight...</li>
+            </ul>
+            <li>we only replaced here the grid border by the path neighbour steps. </li>
+        </ul>
+        <br /><br />
+        As we calculate the next steps for the pathes from the left path to the right path , 2 issues raised : 
         <ul>
             <li>
-                we take the leftStep, which is the calculated step of the left neighbour of the path. if no left neighbour, we take the left side of the grid as a limit
+                the left issue :
             </li>
+            <ul>
+                <li>
+                    the path is on the same step as its left neighbour. 
+                </li>
+                <li>
+                    we calculated that the left neighbour goes on the right 
+                </li>
+                <li>
+                    the path has only one choice : going right
+                </li>
+            </ul>
             <li>
-                we take the rightStep, which is the actual not-yet calculated step of the right neighbour of the path.if no right neighbour, we take the the right side of the grid as a limit.
+                the border grid :
             </li>
-            <li>
-                we the randomly calculate the next step of the selected path, in the boundary of its neighbours...
-            </li>
+            <ul>
+                <li>
+                    the path is on the right border of the grid . 
+                </li>
+                <li>
+                    we calculated that the left neighbour goes on the right
+                </li>
+                <li>
+                    the path has only one choice : going straight .
+                </li>
+            </ul>
         </ul>
-        -two special cases has been raised :<br />
-        <ul>
-            <li>
-                left path issue..
-            </li>
-            <ol>
-                <li>
-                    the selected path and its left neighbour are on a same point .
-                </li>
-                <li>
-                    the left path went on the right ( remember, steps calculus goes from left path to right path ) . .
-                </li>
-                <li>
-                    the selected path goes awol OUTSIDE the left / right pathes boundaries...
-                </li>
-                <li>
-                    selected path needs to follow its left neighbour, in order to avoid a crossing...
-                </li>
-            </ol>
-            <li>
-                The right grid border
-            </li>
-            <ol>
-                <li>
-                    selected path is on the right grid border.
-                </li>
-                <li>
-                    its left neighbour went on right, on the right grid border
-                </li>
-                <li>
-                    As in the algorithm, we consider that if the left path will share a point with the selected path, the selected path can go only straight , or on the right..
-                </li>
-                <li>
-                    .. We need for the selected path to not go outside the grid.. And can only go straight in the case
-                </li>
-            </ol>
-        </ul>
-        - a new function has been added to handle the calculation of all the pathes steps,  called NEXTSTEPS...<br /><br />
-        Of course comments in the js file if you wish to see it, but i suggest to see the refactored one on the next page!<br /><br />
-        <a href="index4.html">Not so Naive implementation... Refactored</a>
+       
+        
+        You can see the algo in main3.js, but i suggest you to see the refactored one on the next page!(main4.js)<br /><br />
+        <a href="index4.html">no crossing... Refactored</a>
         <hr />
         <a href="index.html">To THE GRID</a>
     </div>
