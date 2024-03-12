@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>>Not so naive implementation... Refactored</title>
+
+    <!-- EaselJS -->
+	<script src="libs/easeljs/easeljs.js"></script>
+	<!-- EaselJS -->
+	
+</head>
+
+
+<body>
+<div style="display:flex">
+    <div>
+        <canvas id="demoCanvas" width="800" height="800"></canvas>
+    </div>
+    <div>
+        <h1>Rethinking...</h1>
+
+        I think THIS is an important step, when programming . The quicker your do it the better it is:   as the algo went too complex , I decided to rethink it .. Plus the first demand was to manage xroads , not everything else.
+        So this time , in the limit of the grid :
+        <ul>
+            <li>
+                we randomly generate on which step the xroads pops for all the pathes . those xroads must follow a '' gap '' rule , which means, must have a minimum distance between them.
+            </li>
+            <li>
+                we randomly generate pathes from the left to the right.
+            </li>
+            <li>
+                each path is generated inside a ''corridor ''. the corridor play the limiter
+            </li>
+            <li>
+                at first we divide the grid on equal size corridors.
+            </li>
+            <li>
+                Which means, the right border of each corridor really depends on the columns ( or width ) of the grid , and the number of pathes.
+            </li>
+            <li>
+                as for the left limit, we will base it on the already generated path on the left ... And the shared xroad with it...
+            </li>
+            <li>
+                while randomly generating the path inside the pre-determined corridor, we take into account some esthetic constraint with the xroads with the  neighbour path on the right :
+                <ul>
+                    if the next step is an xroad, the path cannot go on the left. Else the right path will take the same '' way '' of the path, in order to reach the xroad.
+                </ul>
+                <ul>
+                    if we are on the xroad, the path cannot go on the rifht . Else the right path can only take the same '' way '' of the path.
+                </ul>
+                <ul>
+                    if we are on the xroad , and the right limit of the corridor go on the left, the path cannot go straight, too....
+                </ul>
+            </li>
+        </ul>
+        <br />
+        <br />
+        As the algorithm goes, there are still some irregularities, like the corridor constraints are so that two pathes can follow the same way for a long time, even if we avoid it ,or a path
+        can suddendtly ''jump'' 2 or 3 cases on the left or the right, even if we try to move by one case only... but as 90% of the time the algo works, we can still reroll.
+        Correcting it will add some more complexity to the algorithm, which i do not intend to do.
+        <br />
+        <br />
+        <br />
+        On the console, you can find the default config here : S.datas.config<br />
+        The algorithm is here : S.algo.all<br />
+        the config/ algorithm compatibility is checked there :  S.init.checklimits.<br/>
+        the rest of the js object is more like verifying the config , and showing the result on a graphic , so not so usefull in the context...
+        <hr />
+        <a href="index.html">To THE GRID</a>
+    </div>
+</div>
+
+
+<script src="js/main6.js"></script>
+</body>
+</html>
